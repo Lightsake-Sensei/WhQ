@@ -59,6 +59,28 @@ func (this *User) Offline() {
 	this.server.BroadCast(this, "下线")
 }
 
+//发送私有消息
+func (this *User) PrivateSendMsg(msg string) {
+	this.conn.Write([]byte(msg))
+}
+
+//发送新消息
 func (this *User) DoMessage(msg string) {
-	this.server.BroadCast(this, msg)
+	switch msg {
+	case "who":
+		//查询当前用户
+		this.server.mapLock.Lock()
+		for _, user := range this.server.OnlineMap {
+			onlineMsg := "[" + user.Addr + "]" + user.Name + "在线...\n"
+			this.PrivateSendMsg(onlineMsg)
+		}
+		this.server.mapLock.Unlock()
+	case "help":
+		//查询指令
+		this.server.mapLock.Lock()
+		this.PrivateSendMsg("---\nCommond: who \n\t Do: Search online user list\n")
+		this.server.mapLock.Unlock()
+	default:
+		this.server.BroadCast(this, msg)
+	}
 }
