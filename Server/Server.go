@@ -63,22 +63,17 @@ func (this *Server) Handler(conn net.Conn) {
 	//处理当前业务
 	//用户上线并记录
 
-	user := NewUser(conn)
-
-	this.mapLock.Lock()
-	this.OnlineMap[user.Name] = user
-	this.mapLock.Unlock()
-
-	//广播当前用户上线消息
-	this.BroadCast(user, "已上线")
+	user := NewUser(conn, this)
+	user.Online()
 
 	//接受客户端消息
 	go func() {
+		//最多接受4096个字节
 		buf := make([]byte, 4096)
 		for {
 			len, err := conn.Read(buf)
 			if len == 0 {
-				this.BroadCast(user, "下线")
+				user.Offline()
 				return
 			}
 
@@ -92,7 +87,7 @@ func (this *Server) Handler(conn net.Conn) {
 			msg := string(buf[:len-1])
 
 			//广播得到的数据
-			this.BroadCast(user, msg)
+			user.DoMessage(msg)
 		}
 	}()
 
