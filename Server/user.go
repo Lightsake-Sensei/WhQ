@@ -78,7 +78,7 @@ func (this *User) DoMessage(msg string) {
 	case "help":
 		//查询指令
 		this.server.mapLock.Lock()
-		this.PrivateSendMsg("---\nCommond: who \n\t Do: Search online user list\n")
+		this.PrivateSendMsg("---\nCommand: who \n\t Do: Search online user list\n")
 		this.server.mapLock.Unlock()
 	default:
 		this.server.BroadCast(this, msg)
