@@ -2,7 +2,7 @@
 
 ---
 
-a simple chat tool with thread
+a simple chat tool with thread,**Use Linux**
 
 ---
 
