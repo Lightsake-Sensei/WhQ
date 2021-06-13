@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"strings"
 )
 
 type User struct {
@@ -67,6 +68,36 @@ func (this *User) PrivateSendMsg(msg string) {
 
 //发送新消息
 func (this *User) DoMessage(msg string) {
+	//私聊功能
+	if len(msg) > 4 && msg[:3] == "to " {
+		//获取用户名
+		remoteName := strings.Split(msg, " ")[1]
+		if remoteName == "" {
+			this.PrivateSendMsg("请使用消息格式：to [Name] [Message]进行私聊\n")
+			return
+		}
+
+		remoteUser, ok := this.server.OnlineMap[remoteName]
+		if !ok {
+			this.PrivateSendMsg("该用户名不存在\n")
+			return
+		}
+		//发送消息内容给对方
+		sendmsg := strings.Split(msg, " ")[2]
+		if sendmsg == "" {
+			this.PrivateSendMsg("请使用消息格式：to [Name] [Message]进行私聊\n")
+			return
+		}
+
+		for i := 3; i < len(strings.Split(msg, " ")); i++ {
+			sendmsg += " " + strings.Split(msg, " ")[i]
+		}
+
+		remoteUser.PrivateSendMsg("from[" + this.Name + "]:" + sendmsg + "\n")
+
+		return
+	}
+
 	//重命名
 	if len(msg) > 7 && msg[:7] == "rename " {
 		newName := msg[7:]
@@ -99,9 +130,9 @@ func (this *User) DoMessage(msg string) {
 		this.server.mapLock.Unlock()
 	case "help":
 		//查询指令
-
 		this.PrivateSendMsg("---\nCommand: who \n\t Do: Search online user list\n")
 		this.PrivateSendMsg("---\nCommand: rename [newName]\n\t Do: Modifications username\n")
+		this.PrivateSendMsg("---\nCommand: to [Name] [Message]\n\t Do: Private chat to somebody\n")
 
 	default:
 		this.server.BroadCast(this, msg)
