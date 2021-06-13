@@ -1,6 +1,8 @@
 package main
 
-import "net"
+import (
+	"net"
+)
 
 type User struct {
 	Name   string
@@ -46,7 +48,6 @@ func (this *User) Online() {
 
 	//广播当前用户上线消息
 	this.server.BroadCast(this, "已上线")
-
 }
 
 //用户下线功能
@@ -66,6 +67,27 @@ func (this *User) PrivateSendMsg(msg string) {
 
 //发送新消息
 func (this *User) DoMessage(msg string) {
+	//重命名
+	if len(msg) > 7 && msg[:7] == "rename " {
+		newName := msg[7:]
+		this.server.BroadCast(this, "rename:"+this.Name+"->"+msg[7:])
+		//判断用户名是否存在
+		if _, ok := this.server.OnlineMap[newName]; ok {
+			this.PrivateSendMsg("当前用户已被使用\n")
+		} else {
+			this.server.mapLock.Lock()
+			//换名
+			delete(this.server.OnlineMap, this.Name)
+			this.server.OnlineMap[newName] = this
+
+			this.server.mapLock.Unlock()
+
+			this.Name = newName
+			this.PrivateSendMsg("用户名修改成功:" + this.Name + "\n")
+		}
+		return
+	}
+	//无附加属性命令集
 	switch msg {
 	case "who":
 		//查询当前用户
@@ -77,9 +99,10 @@ func (this *User) DoMessage(msg string) {
 		this.server.mapLock.Unlock()
 	case "help":
 		//查询指令
-		this.server.mapLock.Lock()
+
 		this.PrivateSendMsg("---\nCommand: who \n\t Do: Search online user list\n")
-		this.server.mapLock.Unlock()
+		this.PrivateSendMsg("---\nCommand: rename [newName]\n\t Do: Modifications username\n")
+
 	default:
 		this.server.BroadCast(this, msg)
 	}

@@ -71,6 +71,7 @@ func (this *Server) Handler(conn net.Conn) {
 		//最多接受4096个字节
 		buf := make([]byte, 4096)
 		for {
+
 			len, err := conn.Read(buf)
 			if len == 0 {
 				user.Offline()
