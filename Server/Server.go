@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -66,6 +67,9 @@ func (this *Server) Handler(conn net.Conn) {
 	user := NewUser(conn, this)
 	user.Online()
 
+	//监听用户是否活跃的管道
+	isLive := make(chan bool)
+
 	//接受客户端消息
 	go func() {
 		//最多接受4096个字节
@@ -89,11 +93,30 @@ func (this *Server) Handler(conn net.Conn) {
 
 			//广播得到的数据
 			user.DoMessage(msg)
+
+			//用户活跃：任意消息发送
+			isLive <- true
 		}
 	}()
 
 	//当前handle阻塞
-	select {}
+	for {
+		select {
+		case <-isLive:
+			//用户活跃
+			//激活select更新定时器
+
+		case <-time.After(time.Minute * 5):
+			//已经超时
+			user.PrivateSendMsg("由于5分钟未发言，你已被提出服务器")
+			close(user.C)
+
+			conn.Close()
+
+			return
+		}
+	}
+
 }
 
 //广播消息
