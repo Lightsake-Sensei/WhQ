@@ -1,0 +1,2 @@
+rootProject.name = "WhQ-Android"
+include ':app'

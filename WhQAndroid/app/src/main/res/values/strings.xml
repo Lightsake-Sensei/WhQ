@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">WhQ-Android</string>
+    <string name="prompt_ip">请输入Ip</string>
+    <string name="prompt_post">请输入Port</string>
+    <string name="action_sign_in">Connection</string>
+    <string name="prompt_msg">需要发送的数据</string>
+    <string name="prompt_send">发送</string>
+</resources>
