@@ -2,7 +2,9 @@
 
 ---
 
-a simple chat tool with thread,**Use Linux**
+a simple chat tool with thread.
+- go语言实现的客户端与服务端在Linux下运行
+- Android实现客户端功能
 
 ---
 
